@@ -84,7 +84,7 @@ app.get("/populate", function (req, res) {
 })
 
 app.delete("/delete", function(req,res){
-  db.delete().then(function(data){
+  db.remove().then(function(data){
     res.json(data)
   })
 })
