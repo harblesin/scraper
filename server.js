@@ -33,9 +33,11 @@ mongoose.connect("mongodb://localhost/scraper", {
 });
 
 app.get("/", function (req, res) {
-  res.render("home", {
-    title: "What it is bitch"
-  });
+  db.find().then(function (data) {
+    res.render("home", {
+      items: data
+    });
+  }).catch(err => console.log(err));
 });
 
 app.get("/scrape", function (req, res) {
@@ -46,10 +48,10 @@ app.get("/scrape", function (req, res) {
 
 
     $("article h1").each(function (i, element) {
-      
+
       console.log($(this).text());
       console.log($(this).parent("a").attr("href"))
-      
+
       var result = {};
 
       result.title = $(this).text();
@@ -70,7 +72,22 @@ app.get("/scrape", function (req, res) {
   })
 });
 
+app.get("/populate", function (req, res) {
+  db.find().then(function (data) {
+    console.log(data)
+    res.json(data);
+    // res.render("home", {
+    //   items: data
+    // });
 
+  }).catch(err => console.log(err));
+})
+
+app.delete("/delete", function(req,res){
+  db.delete().then(function(data){
+    res.json(data)
+  })
+})
 
 app.listen(PORT, function () {
   console.log("App running on port: " + PORT);
