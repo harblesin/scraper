@@ -45,30 +45,35 @@ app.get("/scrape", function (req, res) {
     console.log("axios sent")
 
     var $ = cheerio.load(response.data);
+    var links = $("h1").filter(function (i, element) {
+      return $(this).parent("a").length > 0;
+    })
+
+    links.each(function (i, element) {
 
 
-    $("article h1").each(function (i, element) {
 
       console.log($(this).text());
       console.log($(this).parent("a").attr("href"))
 
-      var result = {};
+        var result = {};
 
-      result.title = $(this).text();
-      result.link = $(this).parent("a").attr("href");
+        result.title = $(this).text();
+        result.link = $(this).parent("a").attr("href");
 
-      console.log(result.title)
-      console.log(result.link)
-      db.create(result)
-        .then(function (storage) {
-          console.log(storage);
-        })
-        .catch(function (err) {
-          console.log(err)
-        });
+        console.log(result.title)
+        console.log(result.link)
+        db.create(result)
+          .then(function (storage) {
+            console.log(storage);
+          })
+          .catch(function (err) {
+            console.log(err)
+          });
 
-      res.send("You did it, cool, thanks.")
+        
     })
+    res.send("You did it, cool, thanks.")
   })
 });
 
@@ -83,8 +88,8 @@ app.get("/populate", function (req, res) {
   }).catch(err => console.log(err));
 })
 
-app.delete("/delete", function(req,res){
-  db.remove().then(function(data){
+app.delete("/delete", function (req, res) {
+  db.remove().then(function (data) {
     res.json(data)
   })
 })
