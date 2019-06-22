@@ -37,9 +37,9 @@ mongoose.connect("mongodb://localhost/scraper", {
   useNewUrlParser: true
 });
 
-app.get("/", function (req, res) {
+app.get("/", function(req, res) {
   db.Post.find()
-    .then(function (data) {
+    .then(function(data) {
       res.render("home", {
         items: data
       });
@@ -47,16 +47,16 @@ app.get("/", function (req, res) {
     .catch(err => console.log(err));
 });
 
-app.get("/scrape", function (req, res) {
-  axios.get("https://www.clickhole.com/c/news").then(function (response) {
+app.get("/scrape", function(req, res) {
+  axios.get("https://www.clickhole.com/c/news").then(function(response) {
     console.log("axios sent");
 
     var $ = cheerio.load(response.data);
-    var links = $("h1").filter(function (i, element) {
+    var links = $("h1").filter(function(i, element) {
       return $(this).parent("a").length > 0;
     });
 
-    links.each(function (i, element) {
+    links.each(function(i, element) {
       var result = {};
 
       result.title = $(this).text();
@@ -65,10 +65,10 @@ app.get("/scrape", function (req, res) {
         .attr("href");
 
       db.Post.create(result)
-        .then(function (storage) {
+        .then(function(storage) {
           console.log(storage);
         })
-        .catch(function (err) {
+        .catch(function(err) {
           console.log(err);
         });
     });
@@ -76,23 +76,24 @@ app.get("/scrape", function (req, res) {
   });
 });
 
-app.get("/scrape/:id", function (req, res) {
+app.get("/scrape/:id", function(req, res) {
   console.log("Hitting the gEt");
   db.Post.findOne({
-      _id: req.params.id
-    })
+    _id: req.params.id
+  })
     .populate("note")
-    .then(function (data) {
-      console.log(data.note.title)
-      res.json(data)
-    }).catch(function (err) {
-      res.json(err);
+    .then(function(data) {
+      console.log(data);
+      res.json(data);
     })
-})
+    .catch(function(err) {
+      res.json(err);
+    });
+});
 
-app.get("/pop", function (req, res) {
+app.get("/pop", function(req, res) {
   db.Post.find()
-    .then(function (data) {
+    .then(function(data) {
       console.log(data);
       res.json(data);
       // res.render("home", {
@@ -102,34 +103,39 @@ app.get("/pop", function (req, res) {
     .catch(err => console.log(err));
 });
 
-app.post("/scrape/:id", function (req, res) {
-  db.Note.create(req.body).then(function (noteData) {
-      return db.Post.findOneAndUpdate({
-        _id: req.params.id
-      }, {
-        note: noteData._id
-      }, {
-        new: true
-      });
+app.post("/scrape/:id", function(req, res) {
+  db.Note.create(req.body)
+    .then(function(noteData) {
+      return db.Post.findOneAndUpdate(
+        {
+          _id: req.params.id
+        },
+        {
+          note: noteData._id
+        },
+        {
+          new: true
+        }
+      );
     })
-    .then(function (postData) {
-      res.json(postData)
+    .then(function(postData) {
+      res.json(postData);
     })
-    .catch(function (err) {
-      res.json(err)
-    })
-})
-
-app.delete("/delete", function (req, res) {
-  db.Post.deleteMany().then(function () {
-  }).then(function(){
-    db.Note.deleteMany().then(function (data) {
-    res.json(data);
-  })
-  })
-  
+    .catch(function(err) {
+      res.json(err);
+    });
 });
 
-app.listen(PORT, function () {
+app.delete("/delete", function(req, res) {
+  db.Post.deleteMany()
+    .then(function() {})
+    .then(function() {
+      db.Note.deleteMany().then(function(data) {
+        res.json(data);
+      });
+    });
+});
+
+app.listen(PORT, function() {
   console.log("App running on port: " + PORT);
 });
