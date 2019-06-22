@@ -10,7 +10,7 @@ var PORT = 3000;
 
 var app = express();
 
-//var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/scraper";
+var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/scraper";
 
 //app.use(logger("dev"));
 
@@ -33,7 +33,7 @@ app.set("view engine", "handlebars");
 
 app.use(express.static("public"));
 
-mongoose.connect("mongodb://localhost/scraper", {
+mongoose.connect(MONGODB_URI, {
   useNewUrlParser: true
 });
 
