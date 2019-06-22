@@ -46,6 +46,7 @@ $("h3").click(function () {
 
     $.get("/scrape/" + idNum).then(function (data) {
 
+        //console.log(data.note.title);
         $(".notes").append($(`<form><div class='form-group'
      style='margin-top:100px;width:200px'>
     ` + data.title + `<br><br>Title<br><br><input id='titleField' class='form-control'></input></div>
@@ -80,6 +81,7 @@ $(document).on("click", "#saveButton", function () {
             }
         })
         .then(function (data) {
+            console.log(data)
             $(".notes").empty()
         })
     $("#titleField").val("");
