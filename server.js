@@ -4,7 +4,7 @@ var mongoose = require("mongoose");
 var axios = require("axios");
 var cheerio = require("cheerio");
 
-var db = require("./models/post");
+var db = require("./models");
 
 var PORT = 3000;
 
@@ -38,7 +38,7 @@ mongoose.connect("mongodb://localhost/scraper", {
 });
 
 app.get("/", function(req, res) {
-  db.find()
+  db.Post.find()
     .then(function(data) {
       res.render("home", {
         items: data
@@ -64,7 +64,7 @@ app.get("/scrape", function(req, res) {
         .parent("a")
         .attr("href");
 
-      db.create(result)
+      db.Post.create(result)
         .then(function(storage) {
           console.log(storage);
         })
@@ -76,8 +76,18 @@ app.get("/scrape", function(req, res) {
   });
 });
 
+app.get("/scrape/:id", function(req,res){
+  db.Post.findOne({_id: req.params.id})
+  .populate("Note")
+  .then(function(data){
+    res.json(data)
+  }).catch(function(err){
+    res.json(err);
+  })
+})
+
 app.get("/populate", function(req, res) {
-  db.find()
+  db.Post.find()
     .then(function(data) {
       console.log(data);
       res.json(data);
@@ -88,8 +98,20 @@ app.get("/populate", function(req, res) {
     .catch(err => console.log(err));
 });
 
+app.post("/scrape/:id", function(req,res){
+  db.Note.create(req.body).then(function(noteData){
+    return db.Post.findOneAndUpdate({_id: req.params.id}, {note: noteData._id}, {new: true});
+  })
+  .then(function(postData){
+    res.json(postData)
+  })
+  .catch(function(err){
+    res.json(err)
+  })
+})
+
 app.delete("/delete", function(req, res) {
-  db.remove().then(function(data) {
+  db.Post.deleteMany().then(function(data) {
     res.json(data);
   });
 });
