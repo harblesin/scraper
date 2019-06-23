@@ -91,18 +91,6 @@ app.get("/scrape/:id", function(req, res) {
     });
 });
 
-app.get("/pop", function(req, res) {
-  db.Post.find()
-    .then(function(data) {
-      console.log(data);
-      res.json(data);
-      // res.render("home", {
-      //   items: data
-      // });
-    })
-    .catch(err => console.log(err));
-});
-
 app.post("/scrape/:id", function(req, res) {
   db.Note.create(req.body)
     .then(function(noteData) {

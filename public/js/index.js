@@ -1,8 +1,10 @@
 $("#scrape").click(function() {
   console.log("click");
+  $(".content").append($("<h1 id='wait'>LOADING SCRAPE . . . PLEASE WAIT</h2>"));
   $.get("/scrape", function(data) {
     console.log(data);
   }).then(function() {
+    $("#wait").remove();
     location.reload();
   });
 });
