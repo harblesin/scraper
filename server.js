@@ -1,19 +1,20 @@
+//All needed modules are imported
 var express = require("express");
 var mongoose = require("mongoose");
-
 var axios = require("axios");
 var cheerio = require("cheerio");
-
 var db = require("./models");
 
+//Sets the port to an environmental for deployment
 var PORT = process.env.PORT || 3000;
 
+//Pulling in express for further use
 var app = express();
 
+//Defines the variable for deployment using the MongoDB addon on heroku
 var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/scraper";
 
-//app.use(logger("dev"));
-
+//Middleware
 app.use(
   express.urlencoded({
     extended: true
@@ -21,8 +22,8 @@ app.use(
 );
 app.use(express.json());
 
+//Pulling in the handlebars module and telling which engine to use in the app
 var exphbs = require("express-handlebars");
-
 app.engine(
   "handlebars",
   exphbs({
@@ -31,12 +32,15 @@ app.engine(
 );
 app.set("view engine", "handlebars");
 
+//Telling the server where to find static files
 app.use(express.static("public"));
 
+//Connecting to mongoDB heroku addon
 mongoose.connect(MONGODB_URI, {
   useNewUrlParser: true
 });
 
+//Default endpoint which renders the handlebars, and waits for data
 app.get("/", function(req, res) {
   db.Post.find()
     .then(function(data) {
@@ -47,15 +51,22 @@ app.get("/", function(req, res) {
     .catch(err => console.log(err));
 });
 
+//Scrape endpoint, scrapes the defined url when hit, putting the chosen data into
+//an object to push into the db
 app.get("/scrape", function(req, res) {
   axios.get("https://www.clickhole.com/c/news").then(function(response) {
     console.log("axios sent");
 
+    //Loads the page with cheerio
     var $ = cheerio.load(response.data);
+    //Filters out h1 tags without a parent <a> tag, due to the layout of the site page
     var links = $("h1").filter(function(i, element) {
       return $(this).parent("a").length > 0;
     });
 
+    //For each of the new filtered array, puts the grabbed text in the elemeents
+    //and pushes them into the result object, which then is put into the Post collection,
+    //formatted using its model
     links.each(function(i, element) {
       var result = {};
 
@@ -76,6 +87,9 @@ app.get("/scrape", function(req, res) {
   });
 });
 
+//Route for when an Article is clicked, uses the id to populate
+//the note field in the model, so it can be later associated with it when
+// a note is made on it
 app.get("/scrape/:id", function(req, res) {
   console.log("Hitting the gEt");
   db.Post.findOne({
@@ -91,6 +105,8 @@ app.get("/scrape/:id", function(req, res) {
     });
 });
 
+//Using the previously grabbed id once again, this is the endpoint for creating a new note
+//attached to said id, and article with said id
 app.post("/scrape/:id", function(req, res) {
   db.Note.create(req.body)
     .then(function(noteData) {
@@ -114,6 +130,7 @@ app.post("/scrape/:id", function(req, res) {
     });
 });
 
+//Route for deleting everything in both DBs, made with nested promises
 app.delete("/delete", function(req, res) {
   db.Post.deleteMany()
     .then(function() {})

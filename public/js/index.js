@@ -1,5 +1,8 @@
+//Logic for the scrape button, hits the route which hits clickhole.com, susing cheerio to scrape data
 $("#scrape").click(function() {
-  console.log("click");
+  if($(".card-title").val() !== undefined)  {
+    alert("Website has already been scraped! Hit the clear button to remove the articles and notes if you would like to start over!")
+  }else{
   $(".content").append($("<h1 id='wait'>LOADING SCRAPE . . . PLEASE WAIT</h2>"));
   $.get("/scrape", function(data) {
     console.log(data);
@@ -7,22 +10,10 @@ $("#scrape").click(function() {
     $("#wait").remove();
     location.reload();
   });
+  }
 });
 
-$("#pop").click(function() {
-  location.reload();
-
-  // $.ajax({
-  //         method: "GET",
-  //         url: "/populate/"
-  //     })
-  //     .then(function (data) {
-
-  //         }
-
-  //     )
-});
-
+//Click functionality for clearing the db for both the articles and notes
 $("#clear").click(function() {
   //$(".jumbotron").empty();
   $.ajax({
@@ -37,6 +28,9 @@ $("#clear").click(function() {
 //I know this is ugly and monstrous but I found amusement in the thought of it after writing it trying
 //to circumvent some jQuery syntax and with the thought that i've seen no one do this ever,
 //assumedly because it's ugly and not good practice, I thought it was funny and left it.
+
+//When an article is clicked, creates a new text window and textarea that will take in data that will be
+//pushed into the note db serverside, as well as populating the Post model
 $("h3").click(function() {
   $(".notes").empty();
 
@@ -63,13 +57,10 @@ $("h3").click(function() {
       $("#noteField").val(data.note.body);
     }
   });
-  // let titleBox = $("<input>").attr("type","text");
-  // let noteBox = $("<textarea>").attr("style", "width:200px;height:600px");
-  // titleBox.wrap($("<label>").text("Name"));
-  // noteBox.wrap($("<label>").text("Note"));
-  // $("input").wrapAll("<form></form>").appendTo($(".notes"));
 });
 
+//When the button below the note fields is clicked, pushes those values for the note into the note db
+//and populates the article model in the post db serverside
 $(document).on("click", "#saveButton", function() {
   //$("#saveButton").click(function(){
   console.log("yes");
